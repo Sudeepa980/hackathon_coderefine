@@ -1,0 +1,8 @@
+
+{
+  "name": "CodeRefine AI",
+  "description": "A high-performance Generative AI code review and optimization engine that detects bugs, analyzes complexity, and provides secure, optimized code rewrites.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
