@@ -1,108 +1,75 @@
-# CodeRefine – Generative AI Powered Code Review and Optimization Engine
+# CodeRefine
 
-## Overview
+AI-powered automated code review and optimization for **C** and **Python**. Acts as a virtual coding mentor for students.
 
-**CodeRefine** is an intelligent code improvement platform that analyzes source code and suggests optimizations, refactoring improvements, and best practice enhancements to improve readability, efficiency, security, and maintainability.
+- **Static analysis**: syntax errors, unused variables, bad practices, formatting
+- **Logic analysis**: nested loops, redundant computations, unreachable code
+- **Complexity estimation**: time complexity (O(n), O(n²), etc.), loop/recursion hints
+- **Optimization suggestions**: rule-based detection + **Google Gemini** for short, summarized explanations (3–5 bullets, student-friendly)
 
-The system leverages Generative AI models to automatically review and enhance code quality across multiple programming languages.
+## Tech stack
 
----
+- **Backend**: Python, FastAPI, AST (Python) / pattern-based (C), rule-based analyzers, Gemini API
+- **Frontend**: HTML, CSS, JavaScript (code editor + result panels)
+- **Data**: SQLite (with JSON fallback) for analysis history
 
-## Features
+## Setup
 
-**Automated Code Review**
-Analyzes code structure and identifies best practice violations.
+### 1. Backend
 
-**Bug Detection**
-Detects logical errors, syntax risks, and potential runtime failures.
+```bash
+cd CodeRefine/backend
+python -m venv venv
+venv\Scripts\activate   # Windows
+# source venv/bin/activate  # macOS/Linux
+pip install -r requirements.txt
+```
 
-**Performance Optimization**
-Identifies inefficient logic and suggests optimized implementations.
+### 2. Gemini API (optional but recommended)
 
-**Secure Coding Checks**
-Flags security vulnerabilities such as injection risks and unsafe patterns.
+Get an API key from [Google AI Studio](https://makersuite.google.com/app/apikey), then:
 
-**AI Powered Code Rewriting**
-Generates improved and optimized versions of the submitted code.
+```bash
+set GEMINI_API_KEY=your_key_here   # Windows
+# export GEMINI_API_KEY=your_key_here  # macOS/Linux
+```
 
----
+If not set, analysis still runs; only the short AI explanation bullets are skipped.
 
-## Tech Stack
+### 3. Run backend
 
-**Frontend**
-React
-CSS
+```bash
+cd CodeRefine/backend
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
 
-**Backend**
-FastAPI, Node JS
+### 4. Frontend
 
-**AI Integration**
-Gemini
+Open `CodeRefine/frontend/index.html` in a browser, or serve the folder with any static server (e.g. `python -m http.server 8080` from `frontend`). The app calls `http://127.0.0.1:8000` by default.
 
+## Project structure
 
-**Authentication**
-JWT
+```
+CodeRefine/
+  backend/
+    analyzers/       # static, logic, complexity, optimization (rule-based + AST)
+    genai/           # Gemini client and prompt templates (summaries only)
+    main.py          # FastAPI app and history
+    requirements.txt
+  frontend/
+    index.html
+    style.css
+    script.js
+  database/          # history.db (SQLite) or history.json
+```
 
----
+## API
 
-## System Architecture
+- `POST /api/analyze` – body: `{ "code": "...", "language": "python" | "c" }` → full report
+- `GET /api/history` – list recent analyses
+- `GET /api/history/{id}` – get one report by id
 
-The frontend allows users to submit source code.
-The backend processes the request and sends the code to the selected AI model.
-The AI model analyzes the code and returns structured feedback including detected issues and optimized rewrites.
+## Rules
 
----
-
-## Screenshots
-
-### Home Page
-
-![Home Page](screenshots/home.jpeg)
-
-### Code Analysis Interface
-
-![Code Analysis](screenshots/analysis.jpeg)
-
-### Optimized Code Output
-
-
-![Code Analysis](screenshots/analysis2.jpeg)
-![Code Analysis](screenshots/analysis3.jpeg)
-
----
-
-## How to Run Locally
-
-### Step 1: Clone the Repository
-
-git clone [https://github.com/yourusername/CodeRefine.git](https://github.com/yourusername/CodeRefine.git)
-cd CodeRefine
-
-### Step 2: Install Dependencies
-
-npm install
-
-### Step 3: Create Environment File
-
-Create a .env file in the root directory and add:
-
-GEMINI_API_KEY=your_key
-MONGODB_URI=your_url
-JWT_SECRET=your_secret
-
-### Step 4: Run the Application
-
-npm run dev
-
----
-
-## Future Improvements
-
-Add real time collaboration
-Integrate CI CD pipelines
-Add code complexity scoring
-Support more programming languages
-
----
-
-If you tell me your GitHub username and actual screenshot names, I can customize this exactly for your repository.
+- **Gemini** is used only for short, bullet-point explanations (no long paragraphs, no full code generation).
+- **Core analysis** is rule-based and AST-based; AI only enriches with student-friendly summaries.
